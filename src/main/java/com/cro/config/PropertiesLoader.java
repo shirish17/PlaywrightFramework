@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 public class PropertiesLoader {
-	private static final Properties PROPERTIES = new Properties();
+    private static final Properties PROPERTIES = new Properties();
     private static boolean loaded = false;
 
     private PropertiesLoader() {}
@@ -19,31 +19,45 @@ public class PropertiesLoader {
     public static synchronized void load() {
         if (loaded) return;
 
-        loadFile("app-default.properties");
-        loadFile("test-default.properties");
+        // Load mandatory defaults from config folder
+        loadFile("config/app-default.properties", true);
+        loadFile("config/test-default.properties", true);
 
+        // Load environment-specific (optional)
         String env = System.getProperty("env");
         if (env != null && !env.isBlank()) {
-            loadFile(env + ".properties");
+            loadFile("config/" + env + ".properties", false);
         }
 
-        // CLI overrides
-        System.getProperties().forEach((k, v) ->
-                PROPERTIES.put(k, v));
-
+     // CLI overrides EVERYTHING (highest priority)
+        System.getProperties().forEach((k, v) -> PROPERTIES.put(k, v));
+        
+        // 🔍 DEBUG: Print what's actually loaded
+        System.out.println("\n========== DEBUG: ALL USER/PASS PROPERTIES ==========");
+        PROPERTIES.stringPropertyNames().stream()
+            .filter(key -> key.startsWith("user.") || key.startsWith("pass."))
+            .sorted()
+            .forEach(key -> System.out.println("  " + key + " = " + PROPERTIES.getProperty(key)));
+        System.out.println("====================================================\n");
+        
         loaded = true;
+        System.out.println("Properties loaded successfully");
     }
 
-    private static void loadFile(String fileName) {
+    private static void loadFile(String fileName, boolean mandatory) {
         try (InputStream is = PropertiesLoader.class
                 .getClassLoader()
                 .getResourceAsStream(fileName)) {
 
             if (is != null) {
                 PROPERTIES.load(is);
+                System.out.println("Loaded: " + fileName);
+            } else if (mandatory) {
+                throw new RuntimeException("Mandatory property file not found: " + fileName);
+            } else {
+                System.out.println("Optional file not found (skipped): " + fileName);
             }
-
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException("Failed loading property file: " + fileName, e);
         }
     }
@@ -55,8 +69,17 @@ public class PropertiesLoader {
         return value;
     }
 
+    public static String get(String key, String defaultValue) {
+        return PROPERTIES.getProperty(key, defaultValue);
+    }
+
     public static String getBrowser() {
-        return get("browser");
+        String browser = get("browser");
+        return browser.replace("__", "").toLowerCase().trim();
+    }
+
+    public static boolean isHeadless() {
+        return Boolean.parseBoolean(get("headless", "true"));
     }
 
     public static String getBaseUrl() {
@@ -69,5 +92,10 @@ public class PropertiesLoader {
 
     public static String getPassword(String role) {
         return get("pass." + role);
+    }
+    
+    // NEW: Get buildId for session isolation
+    public static String getBuildId() {
+        return System.getProperty("build.id", "local");
     }
 }

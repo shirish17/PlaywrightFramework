@@ -9,19 +9,22 @@ import io.cucumber.java.Scenario;
 
 public class ScenarioHooks {
 
-    @Before
-    public void setup(Scenario scenario) {
-        String role = RoleContext.getRole();
-        SessionManager.createOrReuse(role);
-    }
+    // ❌ NO @Before - Session creation happens in Background step itself
 
     @After
     public void tearDown(Scenario scenario) {
 
         if (scenario.isFailed()) {
-            byte[] screenshot = BrowserManager.getPage()
-                    .screenshot();
-            scenario.attach(screenshot, "image/png", "Failure Screenshot");
+            System.out.println("  ❌ Scenario FAILED - capturing screenshot");
+            
+            try {
+                byte[] screenshot = BrowserManager.getPage().screenshot();
+                scenario.attach(screenshot, "image/png", "Failure Screenshot");
+            } catch (Exception e) {
+                System.out.println("  ⚠ Screenshot capture failed: " + e.getMessage());
+            }
+        } else {
+            System.out.println("  ✅ Scenario PASSED");
         }
 
         BrowserManager.closeContext();

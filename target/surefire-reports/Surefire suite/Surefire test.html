@@ -55,11 +55,11 @@ function toggleAllBoxes() {
 <body>
 <h2 align='center'>Surefire test</h2><table border='1' align="center">
 <tr>
-<td>Tests passed/Failed/Skipped:</td><td>0/0/0</td>
+<td>Tests passed/Failed/Skipped:</td><td>0/4/0</td>
 </tr><tr>
-<td>Started on:</td><td>Fri Feb 13 12:36:01 UTC 2026</td>
+<td>Started on:</td><td>Fri Feb 13 18:10:21 UTC 2026</td>
 </tr>
-<tr><td>Total time:</td><td>1 seconds (1080 ms)</td>
+<tr><td>Total time:</td><td>196 seconds (196432 ms)</td>
 </tr><tr>
 <td>Included groups:</td><td></td>
 </tr><tr>
@@ -68,7 +68,7 @@ function toggleAllBoxes() {
 </table><p/>
 <small><i>(Hover the method name to see the test class name)</i></small><p/>
 <table width='100%' border='1' class='invocation-failed'>
-<tr><td colspan='4' align='center'><b>FAILED CONFIGURATIONS</b></td></tr>
+<tr><td colspan='4' align='center'><b>FAILED TESTS</b></td></tr>
 <tr><td><b>Test method</b></td>
 <td><b>Attribute(s)</b></td>
 <td width="30%"><b>Exception</b></td>
@@ -76,18 +76,316 @@ function toggleAllBoxes() {
 <td><b>Instance</b></td>
 </tr>
 <tr>
-<td title='runners.RunCucumberTest.setUpClass()'><b>setUpClass</b><br>Test class: runners.RunCucumberTest<br>Parameters: org.testng.TestRunner@3a60c416</td>
-<td><div><pre>java.lang.RuntimeException: Missing property: browser
-	at com.cro.config.PropertiesLoader.get(PropertiesLoader.java:54)
-	at com.cro.config.PropertiesLoader.getBrowser(PropertiesLoader.java:59)
-	at com.cro.hooks.GlobalHooks.beforeAll(GlobalHooks.java:13)
-</pre></div><a href='#' onClick='toggleBox("stack-trace102174918", this, "Click to show all stack frames", "Click to hide stack frames")'>Click to show all stack frames</a>
-<div class='stack-trace' id='stack-trace102174918'><pre>java.lang.RuntimeException: Missing property: browser
-	at com.cro.config.PropertiesLoader.get(PropertiesLoader.java:54)
-	at com.cro.config.PropertiesLoader.getBrowser(PropertiesLoader.java:59)
-	at com.cro.hooks.GlobalHooks.beforeAll(GlobalHooks.java:13)
+<td title='runners.RunCucumberTest.runScenario()'><b>runScenario</b><br>Test class: runners.RunCucumberTest<br>Test method: Runs Cucumber Scenarios<br>Parameters: "User with view role able to edit an existing country", "System configuration page"</td>
+<td><div><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;viewer&quot;(classpath:features/SystemConfiguration/system_configuration.feature:44)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div><a href='#' onClick='toggleBox("stack-trace640183144", this, "Click to show all stack frames", "Click to hide stack frames")'>Click to show all stack frames</a>
+<div class='stack-trace' id='stack-trace640183144'><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;viewer&quot;(classpath:features/SystemConfiguration/system_configuration.feature:44)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
 </pre></div></td>
-<td>1</td>
+<td>187</td>
+<td>runners.RunCucumberTest@6f01b95f</td></tr>
+<tr>
+<td title='runners.RunCucumberTest.runScenario()'><b>runScenario</b><br>Test class: runners.RunCucumberTest<br>Test method: Runs Cucumber Scenarios<br>Parameters: "User with create role able to add a new country with active status", "System configuration page"</td>
+<td><div><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;creator&quot;(classpath:features/SystemConfiguration/system_configuration.feature:12)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div><a href='#' onClick='toggleBox("stack-trace463286983", this, "Click to show all stack frames", "Click to hide stack frames")'>Click to show all stack frames</a>
+<div class='stack-trace' id='stack-trace463286983'><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;creator&quot;(classpath:features/SystemConfiguration/system_configuration.feature:12)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div></td>
+<td>139</td>
+<td>runners.RunCucumberTest@6f01b95f</td></tr>
+<tr>
+<td title='runners.RunCucumberTest.runScenario()'><b>runScenario</b><br>Test class: runners.RunCucumberTest<br>Test method: Runs Cucumber Scenarios<br>Parameters: "User with delete role able to edit an existing country", "System configuration page"</td>
+<td><div><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;deletor&quot;(classpath:features/SystemConfiguration/system_configuration.feature:33)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div><a href='#' onClick='toggleBox("stack-trace1488715056", this, "Click to show all stack frames", "Click to hide stack frames")'>Click to show all stack frames</a>
+<div class='stack-trace' id='stack-trace1488715056'><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;deletor&quot;(classpath:features/SystemConfiguration/system_configuration.feature:33)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div></td>
+<td>91</td>
+<td>runners.RunCucumberTest@6f01b95f</td></tr>
+<tr>
+<td title='runners.RunCucumberTest.runScenario()'><b>runScenario</b><br>Test class: runners.RunCucumberTest<br>Test method: Runs Cucumber Scenarios<br>Parameters: "User with edit role able to edit an existing country", "System configuration page"</td>
+<td><div><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;editor&quot;(classpath:features/SystemConfiguration/system_configuration.feature:23)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div><a href='#' onClick='toggleBox("stack-trace1067960120", this, "Click to show all stack frames", "Click to hide stack frames")'>Click to show all stack frames</a>
+<div class='stack-trace' id='stack-trace1067960120'><pre>com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.WaitableResult.get(WaitableResult.java:52)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:138)
+	at com.microsoft.playwright.impl.Connection.sendMessage(Connection.java:131)
+	at com.microsoft.playwright.impl.ChannelOwner.sendMessage(ChannelOwner.java:124)
+	at com.microsoft.playwright.impl.FrameImpl.fill(FrameImpl.java:310)
+	at com.microsoft.playwright.impl.PageImpl.fill(PageImpl.java:766)
+	at com.microsoft.playwright.Page.fill(Page.java:4745)
+	at com.cro.playwright.SessionManager.createOrReuse(SessionManager.java:76)
+	at steps.LoginSteps.i_login_as_role(LoginSteps.java:19)
+	at ✽.I login as role &quot;editor&quot;(classpath:features/SystemConfiguration/system_configuration.feature:23)
+Caused by: com.microsoft.playwright.TimeoutError: Error {
+  message=&apos;Timeout 30000ms exceeded.
+  name=&apos;TimeoutError
+  stack=&apos;TimeoutError: Timeout 30000ms exceeded.
+    at ProgressController.run (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\progress.js:68:28)
+    at FrameDispatcher._runCommand (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:95:31)
+    at DispatcherConnection.dispatch (C:\Users\SHIRIS~1\AppData\Local\Temp\playwright-java-868987840816986776\package\lib\server\dispatchers\dispatcher.js:329:39)
+}
+Call log:
+-   - waiting for locator(&quot;#username&quot;)
+
+	at com.microsoft.playwright.impl.Connection.dispatch(Connection.java:257)
+	at com.microsoft.playwright.impl.Connection.processOneMessage(Connection.java:214)
+	at com.microsoft.playwright.impl.ChannelOwner.runUntil(ChannelOwner.java:136)
+	... 8 more
+</pre></div></td>
+<td>45</td>
 <td>runners.RunCucumberTest@6f01b95f</td></tr>
 </table><p>
 </body>

@@ -4,7 +4,6 @@ import com.microsoft.playwright.Page;
 import com.cro.playwright.PageActions;
 
 public class TestContext {
-
     private Page page;
     private PageActions actions;
 

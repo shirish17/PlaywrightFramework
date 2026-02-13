@@ -3,9 +3,11 @@ package com.cro.playwright;
 import com.microsoft.playwright.Page;
 
 public class PageActions {
-    private Page page;
+	private final Page page;
 
-    public PageActions(Page page) { this.page = page; }
+    public PageActions(Page page) {
+        this.page = page;
+    }
 
     public void click(String selector) {
         page.locator(selector).click();
@@ -17,5 +19,13 @@ public class PageActions {
 
     public String getText(String selector) {
         return page.locator(selector).textContent();
+    }
+
+    public void navigate(String url) {
+        page.navigate(url);
+    }
+
+    public void waitForSelector(String selector) {
+        page.waitForSelector(selector);
     }
 }
