@@ -28,7 +28,7 @@ public class PropertiesLoader {
      // CLI overrides EVERYTHING (highest priority)
         System.getProperties().forEach((k, v) -> PROPERTIES.put(k, v));
         
-        // 🔍 DEBUG: Print what's actually loaded
+        // DEBUG: Print what's actually loaded
         System.out.println("\n========== DEBUG: ALL USER/PASS PROPERTIES ==========");
         PROPERTIES.stringPropertyNames().stream()
             .filter(key -> key.startsWith("user.") || key.startsWith("pass."))
