@@ -1,9 +1,0 @@
-com\cro\hooks\GlobalHooks.class
-com\cro\playwright\SessionManager.class
-com\cro\playwright\BrowserManager.class
-com\cro\config\EnvConfig.class
-com\cro\context\RoleContext.class
-com\cro\hooks\ScenarioHooks.class
-com\cro\utils\DateTimeUtils.class
-com\cro\config\PropertiesLoader.class
-com\cro\playwright\PageActions.class
