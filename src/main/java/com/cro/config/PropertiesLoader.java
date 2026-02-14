@@ -1,0 +1,111 @@
+package com.cro.config;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Properties;
+
+public class PropertiesLoader {
+    private static final Properties PROPERTIES = new Properties();
+    private static boolean loaded = false;
+
+    private PropertiesLoader() {}
+
+    public static synchronized void load() {
+        if (loaded) return;
+
+        // Load mandatory defaults from config folder
+        loadFile("config/app-default.properties", true);
+        loadFile("config/test-default.properties", true);
+
+        // Load environment-specific (optional)
+        String env = System.getProperty("env");
+        if (env != null && !env.isBlank()) {
+            loadFile("config/" + env + ".properties", false);
+        }
+
+     // CLI overrides EVERYTHING (highest priority)
+        System.getProperties().forEach((k, v) -> PROPERTIES.put(k, v));
+        
+        // 🔍 DEBUG: Print what's actually loaded
+        System.out.println("\n========== DEBUG: ALL USER/PASS PROPERTIES ==========");
+        PROPERTIES.stringPropertyNames().stream()
+            .filter(key -> key.startsWith("user.") || key.startsWith("pass."))
+            .sorted()
+            .forEach(key -> System.out.println("  " + key + " = " + PROPERTIES.getProperty(key)));
+        System.out.println("====================================================\n");
+        
+        loaded = true;
+        System.out.println("Properties loaded successfully");
+    }
+
+    private static void loadFile(String fileName, boolean mandatory) {
+        try (InputStream is = PropertiesLoader.class
+                .getClassLoader()
+                .getResourceAsStream(fileName)) {
+
+            if (is != null) {
+                PROPERTIES.load(is);
+                System.out.println("Loaded: " + fileName);
+            } else if (mandatory) {
+                throw new RuntimeException("Mandatory property file not found: " + fileName);
+            } else {
+                System.out.println("Optional file not found (skipped): " + fileName);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed loading property file: " + fileName, e);
+        }
+    }
+
+    public static String get(String key) {
+        String value = PROPERTIES.getProperty(key);
+        if (value == null)
+            throw new RuntimeException("Missing property: " + key);
+        return value;
+    }
+
+    public static String get(String key, String defaultValue) {
+        return PROPERTIES.getProperty(key, defaultValue);
+    }
+
+    public static String getBrowser() {
+        String browser = get("browser");
+        return browser.replace("__", "").toLowerCase().trim();
+    }
+
+    public static boolean isHeadless() {
+        return Boolean.parseBoolean(get("headless", "true"));
+    }
+
+    public static String getBaseUrl() {
+        return get("base.url");
+    }
+
+    public static String getUsername(String role) {
+        return get("user." + role);
+    }
+
+    public static String getPassword(String role) {
+        return get("pass." + role);
+    }    
+    
+    /**
+     * Get build ID for session isolation.
+     * Priority:
+     * 1. CLI override: -Dbuild.id=BUILD_12345 (for CI/CD)
+     * 2. System property from Maven: build.id (timestamp from pom.xml)
+     * 3. Fallback: Generate timestamp in format d-MMM-yy_HH-mm-ss
+     */
+    public static String getBuildId() {
+        String buildId = System.getProperty("build.id");
+        
+        if (buildId != null && !buildId.isBlank() && !"${maven.build.timestamp}".equals(buildId)) {
+            return buildId;
+        }
+        
+        // Generate timestamp: 13-Feb-26_17-45-30
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-yy_HH-mm-ss");
+        return LocalDateTime.now().format(formatter);
+    }
+}
