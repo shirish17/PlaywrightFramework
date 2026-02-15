@@ -26,7 +26,7 @@ public class PropertiesLoader {
         }
 
      // CLI overrides EVERYTHING (highest priority)
-        System.getProperties().forEach((k, v) -> PROPERTIES.put(k, v));
+        System.getProperties().forEach((key, value) -> PROPERTIES.put(key, value));
         
         // DEBUG: Print what's actually loaded
         System.out.println("\n========== DEBUG: ALL USER/PASS PROPERTIES ==========");
@@ -107,5 +107,20 @@ public class PropertiesLoader {
         // Generate timestamp: 13-Feb-26_17-45-30
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-yy_HH-mm-ss");
         return LocalDateTime.now().format(formatter);
+    }
+ // ========== NEW: TIMEOUT METHODS ==========
+
+    /**
+     * Get element timeout in milliseconds (default: 10000ms = 10s)
+     */
+    public static int getElementTimeout() {
+        return Integer.parseInt(get("timeout.element", "10000"));
+    }
+
+    /**
+     * Get page timeout in milliseconds (default: 30000ms = 30s)
+     */
+    public static int getPageTimeout() {
+        return Integer.parseInt(get("timeout.page", "30000"));
     }
 }
