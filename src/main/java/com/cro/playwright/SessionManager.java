@@ -55,7 +55,7 @@ public final class SessionManager {
 
         BrowserContext context;
 
-        // ✅ FIX: SYNCHRONIZE ALL CONTEXT OPERATIONS
+        // ✅ CRITICAL: SYNCHRONIZE ALL CONTEXT OPERATIONS
         synchronized (BROWSER_LOCK) {
             Browser browser = BrowserManager.getBrowser();
 
@@ -67,7 +67,7 @@ public final class SessionManager {
                             new Browser.NewContextOptions()
                                     .setStorageStatePath(path));
                 } catch (Exception e) {
-                    System.err.println("⚠ Session file corrupted, recreating: " + e.getMessage());
+                    System.err.println("⚠ Session file corrupted: " + e.getMessage());
                     try {
                         Files.delete(path);
                     } catch (Exception deleteError) {
@@ -82,16 +82,23 @@ public final class SessionManager {
             // CRITICAL: Set context INSIDE synchronized block
             BrowserManager.setContext(context);
             
-        } // Lock released here - scenarios execute in parallel
+        } // Lock released here
+        
+        // CRITICAL: Release context protection AFTER lock exits
+        BrowserManager.releaseContext();
         
         System.out.println("✓ Context ready for thread: " + Thread.currentThread().getName());
     }
 
     /**
      * Create new session with retry logic.
+     * 
+     * IMPORTANT: This method is called from inside synchronized block.
      */
-    private static BrowserContext createNewSession(Browser browser, LoginCallback loginCallback, 
-                                                   Path path, String username) {
+    private static BrowserContext createNewSession(Browser browser, 
+                                                   LoginCallback loginCallback, 
+                                                   Path path, 
+                                                   String username) {
         System.out.println("🔐 Creating NEW session for: " + username);
 
         BrowserContext context = browser.newContext();

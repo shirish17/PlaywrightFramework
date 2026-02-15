@@ -4,12 +4,14 @@ import com.microsoft.playwright.*;
 
 public class BrowserManager {
 
-
     private static Playwright playwright;
     private static Browser browser;
 
     private static final ThreadLocal<BrowserContext> contextThreadLocal = new ThreadLocal<>();
     private static final ThreadLocal<Page> pageThreadLocal = new ThreadLocal<>();
+    
+    // CRITICAL: Track if context is in use by synchronized block
+    private static final ThreadLocal<Boolean> contextInUse = new ThreadLocal<>();
 
     private BrowserManager() {}
 
@@ -54,31 +56,36 @@ public class BrowserManager {
         }
         
         if (!browser.isConnected()) {
-            throw new IllegalStateException("Browser disconnected - restart needed");
+            throw new IllegalStateException("Browser disconnected");
         }
         
         return browser;
     }
 
+    /**
+     * Set context and mark as in-use.
+     * Called from SessionManager inside synchronized block.
+     */
     public static void setContext(BrowserContext context) {
         if (context == null) {
             throw new IllegalArgumentException("Cannot set null context");
         }
         
-        // Defensive: clean existing context if any
-        BrowserContext existing = contextThreadLocal.get();
-        if (existing != null && existing != context) {
-            try {
-                existing.close();
-            } catch (Exception e) {
-                // Ignore - new context will replace it anyway
-            }
-        }
+        // Mark context as in-use (protected from early closure)
+        contextInUse.set(true);
         
         contextThreadLocal.set(context);
         pageThreadLocal.set(context.newPage());
         
         System.out.println("  ✓ Context set for: " + Thread.currentThread().getName());
+    }
+
+    /**
+     * Mark context as ready for cleanup.
+     * Called from SessionManager after synchronized block exits.
+     */
+    public static void releaseContext() {
+        contextInUse.set(false);
     }
 
     public static BrowserContext getContext() {
@@ -104,6 +111,52 @@ public class BrowserManager {
         return page;
     }
 
+    /**
+     * Safe close - only close if not in use by synchronized block.
+     * Called from @After hook.
+     */
+    public static void safeCloseContext() {
+        Boolean inUse = contextInUse.get();
+        if (inUse != null && inUse) {
+            // Context still in use by SessionManager - DON'T close
+            System.out.println("  ⚠ Context in use - skipping close");
+            return;
+        }
+        
+        BrowserContext ctx = contextThreadLocal.get();
+        if (ctx != null) {
+            try {
+                ctx.close();
+                System.out.println("  ✓ Context closed");
+            } catch (Exception e) {
+                System.err.println("  ⚠ Error closing context: " + e.getMessage());
+            } finally {
+                contextThreadLocal.remove();
+                pageThreadLocal.remove();
+                contextInUse.remove();
+            }
+        } else {
+            // Still clean ThreadLocal
+            contextThreadLocal.remove();
+            pageThreadLocal.remove();
+            contextInUse.remove();
+        }
+    }
+
+    /**
+     * Clear ThreadLocal without closing context.
+     * Used in @Before hook for defensive cleanup.
+     */
+    public static void clearThreadLocal() {
+        contextThreadLocal.remove();
+        pageThreadLocal.remove();
+        contextInUse.remove();
+    }
+
+    /**
+     * Force close - backward compatibility.
+     * Prefer safeCloseContext() instead.
+     */
     public static void closeContext() {
         BrowserContext ctx = contextThreadLocal.get();
         if (ctx != null) {
@@ -114,11 +167,12 @@ public class BrowserManager {
             } finally {
                 contextThreadLocal.remove();
                 pageThreadLocal.remove();
+                contextInUse.remove();
             }
         } else {
-            // Still clean ThreadLocal
             contextThreadLocal.remove();
             pageThreadLocal.remove();
+            contextInUse.remove();
         }
     }
 
