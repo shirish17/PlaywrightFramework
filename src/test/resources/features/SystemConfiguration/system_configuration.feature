@@ -27,5 +27,26 @@ Feature: System configuration page
 
     Examples:
       | country           |
-      | Auto_CountryName  |    
-  
+      | Auto_CountryName  |      
+      
+ Scenario Outline: User with delete role able to delete an existing country
+    Given I login as role "deletor"
+    #When the user is on the country management page
+    #And the user adds a country named "<country>" and activates it
+    #Then the country "<country>" appears in the list
+
+    Examples:
+      | country           |
+      | Auto_CountryName  |
+      
+      
+ Scenario Outline: User with view role able to view an existing country
+    Given I login as role "viewer"
+    #When the user is on the country management page
+    #And the user adds a country named "<country>" and activates it
+    #Then the country "<country>" appears in the list
+
+    Examples:
+      | country           |
+      | Auto_CountryName  |
+   
