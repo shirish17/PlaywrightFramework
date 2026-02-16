@@ -1,6 +1,5 @@
 package runners;
 
-
 import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
@@ -15,12 +14,11 @@ import org.testng.annotations.DataProvider;
                 "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
         }
 )
-public class RunCucumberTest extends AbstractTestNGCucumberTests {
+public class RunCucumberTestParallel extends AbstractTestNGCucumberTests {
     
     @Override
-    @DataProvider(parallel = false)  // ← CHANGED: false for sequential
+    @DataProvider(parallel = true)  // ← TRUE for parallel
     public Object[][] scenarios() {
         return super.scenarios();
     }
 }
-

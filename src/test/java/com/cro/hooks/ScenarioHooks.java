@@ -34,7 +34,6 @@ public class ScenarioHooks {
                 System.out.println("  ✅ Scenario PASSED");
             }
         } finally {
-            // SAFE CLOSE: Uses ReadWriteLock to wait for any context creation
             BrowserManager.closeContext();
             RoleContext.clear();
         }

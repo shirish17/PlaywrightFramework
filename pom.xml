@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.cro</groupId>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.cro</groupId>
 	<artifactId>CTMS_Automation</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
@@ -18,7 +19,8 @@
 		<!-- Centralized place for fork and thread count if nothing else defines
 		these properties, use these sane defaults. -->
 		<dp.threads>1</dp.threads>
-		<!-- Build ID for session isolation (timestamp by default, CI can override), this is for session storage -->
+		<!-- Build ID for session isolation (timestamp by default, CI can
+		override), this is for session storage -->
 		<build.id>${maven.build.timestamp}</build.id>
 	</properties>
 
@@ -42,7 +44,7 @@
 		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-picocontainer</artifactId>
-			<version>${cucumber.version}</version>			
+			<version>${cucumber.version}</version>
 		</dependency>
 
 
@@ -138,7 +140,7 @@
 
 				<configuration>
 					<!-- 🛑 HARD SAFETY NET: kill stuck JVM -->
-					<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>									
+					<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
 					<!-- Single JVM (Playwright-safe) -->
 					<forkCount>1</forkCount>
 					<reuseForks>false</reuseForks>
@@ -161,11 +163,13 @@
 
 						<cucumber.filter.tags>${cucumber.tags}</cucumber.filter.tags>
 						<user.timezone>UTC</user.timezone>
-						<build.id>${build.id}</build.id>  <!-- Pass build ID to framework in session storage-->
+						<build.id>${build.id}</build.id>  <!-- Pass build ID to
+						framework in session storage-->
 					</systemPropertyVariables>
 
 					<includes>
-						<include>**/RunCucumberTest.java</include>
+						<include>${test.runner}</include>  <!-- ← Uses profile
+						property -->
 					</includes>
 
 					<trimStackTrace>false</trimStackTrace>
@@ -189,20 +193,17 @@
 			</activation>
 			<properties>
 				<dp.threads>1</dp.threads>
-				<cucumber.tags></cucumber.tags>
-				<!-- NOTE: we do NOT set <env> here; your framework will
-				fallback to default.properties -->
+				<cucumber.tags>@smoke and @high</cucumber.tags>
+				<test.runner>**/RunCucumberTest.java</test.runner>
 			</properties>
 		</profile>
 		<!-- PARALLEL: Opt-in with -Pparallel -->
 		<profile>
 			<id>parallel</id>
 			<properties>
-				<!-- Tune per node; override in CI if needed -->
 				<dp.threads>2</dp.threads>
-				<cucumber.tags></cucumber.tags>
-				<!-- NOTE: we do NOT set <env> here; pass -Denv=val|dev|uat	when
-				needed -->
+				<cucumber.tags>@smoke and @high</cucumber.tags>
+				<test.runner>**/RunCucumberTestParallel.java</test.runner>
 			</properties>
 		</profile>
 	</profiles>

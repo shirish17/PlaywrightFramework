@@ -31,7 +31,7 @@ public class PropertiesLoader {
         // DEBUG: Print what's actually loaded
         System.out.println("\n========== DEBUG: ALL USER/PASS PROPERTIES ==========");
         PROPERTIES.stringPropertyNames().stream()
-            .filter(key -> key.startsWith("user.") || key.startsWith("pass."))
+            .filter(key -> key.startsWith("user.") || key.startsWith("pass.") || key.startsWith("tenant."))
             .sorted()
             .forEach(key -> System.out.println("  " + key + " = " + PROPERTIES.getProperty(key)));
         System.out.println("====================================================\n");
@@ -122,5 +122,32 @@ public class PropertiesLoader {
      */
     public static int getPageTimeout() {
         return Integer.parseInt(get("timeout.page", "30000"));
+    }
+    /**
+     * Get tenant name for a specific role.
+     * Returns null if user is single-tenant (no tenant.{role} property).
+     * 
+     * @param role User role (e.g., "creator", "editor")
+     * @return Tenant name or null if single-tenant
+     */
+    public static String getTenantForRole(String role) {
+        String tenantKey = "tenant." + role;
+        String tenantName = PROPERTIES.getProperty(tenantKey);
+        
+        if (tenantName == null || tenantName.isBlank()) {
+            return null;
+        }
+        
+        return tenantName.trim();
+    }
+
+    /**
+     * Check if a role is multi-tenant.
+     * 
+     * @param role User role
+     * @return true if tenant.{role} property exists
+     */
+    public static boolean isMultiTenant(String role) {
+        return getTenantForRole(role) != null;
     }
 }
