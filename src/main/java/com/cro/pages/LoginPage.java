@@ -3,16 +3,13 @@ package com.cro.pages;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
-import com.microsoft.playwright.options.LoadState;
 
 /**
  * Login page object.
- * EXTENDS BasePage for direct access to actions.
  */
-
 public class LoginPage extends BasePage {
 
-	private static final String ADFS_ACTIVE_DIRECTORY = "text=Active Directory";
+    private static final String ADFS_ACTIVE_DIRECTORY = "span.largeTextNoWrap:has-text('Active Directory')";
     private static final String USERNAME = "#userNameInput";
     private static final String PASSWORD = "#passwordInput"; 
     private static final String SIGNIN_PARENT_BY_ID = "#submissionArea";
@@ -41,47 +38,36 @@ public class LoginPage extends BasePage {
 
     // ========== ACTIONS ==========
 
-    /**
-     * Navigate to login page.
-     */
     public LoginPage open(String baseUrl) {
         navigate(baseUrl);
         waitForLoadState();
         return this;
     }
 
-    /**
-     * Perform login with credentials.
-     */
     public void login(String username, String password) {
         System.out.println("   🔐 Logging in as: " + username);
-        
-        // Click ADFS if needed
-        if (isVisible(adfsButton())) {
+
+        // Wait for ADFS page to fully render, then click Active Directory
+        try {
+            waitForVisible(adfsButton());
             clickOnElement(adfsButton());
             waitForLoadState();
+        } catch (Exception e) {
+            System.out.println("   No ADFS screen - proceeding directly");
         }
-        
+
         fillElement(usernameInput(), username);
         fillElement(passwordInput(), password);
         clickOnElement(loginButton());
-        
-        // Wait for page to load
+
         waitForLoadState();
-        
-        // Small buffer for login processing
+
         try {
             getPage().waitForTimeout(3000);
-        } catch (Exception e) {
-            // Ignore
-        }
-        
+        } catch (Exception ignored) {}
+
         System.out.println("Login completed");
     }
-
-    /**
-     * Static method for SessionManager callback.
-     */
     public static void performLoginForSession(Page page, String username, 
                                               String password, String baseUrl) {
         LoginPage loginPage = new LoginPage() {
@@ -95,9 +81,6 @@ public class LoginPage extends BasePage {
         loginPage.login(username, password);
     }
 
-    /**
-     * Check if on login page.
-     */
     public boolean isOnLoginPage() {
         return getCurrentUrl().contains("login") || isVisible(loginButton());
     }

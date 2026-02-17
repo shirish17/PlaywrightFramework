@@ -33,19 +33,7 @@ public class CountryPage extends BasePage {
 	        " ul[role='listbox'].k-list-ul";
 	private static final String AVAILABLE_OPTION_CONTAINER_BY_ROLE="ul[role='listbox'].k-list-ul"; //this is for fallback plan
     
-    /*
-    private static final String SYSTEM_CONFIG_MENU = "ul.dropdown_menu:has(a[routerlink='/console/systemConfig'])";
-    private static final String SYSTEM_CONFIG_LINK = "a[routerlink='/console/systemConfig']";
-    private static final String LISTS_TAB = "List(s)";
-    private static final String COUNTRY_NAME_LABEL = "text=Country Name";
-    private static final String NEW_OPTION_MENU = "text=New Option";
-    private static final String NEW_OPTION_DIALOG = "div[role='dialog']:has(h2:has-text('New Option'))";
-    private static final String OPTION_NAME_INPUT = "div:has(> span:has-text('Option Name')) input.k-input-inner[type='text']";
-    private static final String SAVE_BUTTON_IN_DIALOG = "Save";
-    private static final String SAVE_BUTTON_FOOTER = "span.leftSideBarActionItemsLabel:has-text('Save')";
-    private static final String SUCCESS_MESSAGE = "div";
-    */
-
+  
     // ========== LOCATORS ==========
     //Configuration link on top menu
     private Locator configurationMenuLink() {
@@ -121,7 +109,7 @@ public class CountryPage extends BasePage {
         configurationMenuLink().scrollIntoViewIfNeeded();
         configurationMenuLink().hover();
         
-        waitVisible(systemConfigLink());
+        //waitVisible(systemConfigLink());
         
         //Click on System configuration link under menu
         clickOnElement(systemConfigLink());        
@@ -131,7 +119,7 @@ public class CountryPage extends BasePage {
         waitForUrl(SYSTEM_CONFIG_URL);
         waitForKendoAngularPageReady();
         
-        navigateBack();
+        //navigateBack();
         /*
         // Click Lists tab
         listsTab().waitFor(new Locator.WaitForOptions()

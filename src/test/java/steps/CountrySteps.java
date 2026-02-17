@@ -1,19 +1,20 @@
 package steps;
 
 import org.testng.Assert;
-
 import com.cro.config.PropertiesLoader;
 import com.cro.pages.CountryPage;
 import com.cro.pages.HomePage;
 import com.cro.playwright.BrowserManager;
-
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+/**
+ * Country management step definitions.
+ */
 public class CountrySteps {
 
-	private final CountryPage countryPage;
+    private final CountryPage countryPage;
     private final HomePage homePage;
     private String generatedCountryName;
 
@@ -24,7 +25,7 @@ public class CountrySteps {
 
     @When("the user is on the country management page")
     public void navigateToCountryPage() {
-        // CRITICAL: Navigate + handle tenant FIRST (only on first When step)
+        // Navigate to app if on blank page
         String currentUrl = BrowserManager.getPage().url();
         
         if (currentUrl.equals("about:blank")) {
@@ -32,12 +33,11 @@ public class CountrySteps {
             String baseUrl = PropertiesLoader.getBaseUrl();
             BrowserManager.getPage().navigate(baseUrl);
             
-            // Wait for page load
             BrowserManager.getPage().waitForLoadState(
                 com.microsoft.playwright.options.LoadState.LOAD);
             
             try {
-                BrowserManager.getPage().waitForTimeout(10000);
+                BrowserManager.getPage().waitForTimeout(3000);
             } catch (Exception e) {
                 // Ignore
             }
@@ -48,10 +48,9 @@ public class CountrySteps {
         
         // Navigate to country management
         countryPage.navigateViaMenu();
-        /*
+        
         Assert.assertTrue(countryPage.isOnCountryPage(), 
             "Should be on country management page");
-            */
     }
     /*
 

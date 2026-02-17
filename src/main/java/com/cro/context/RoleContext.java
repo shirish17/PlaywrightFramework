@@ -1,23 +1,27 @@
 package com.cro.context;
 
+/**
+ * ThreadLocal storage for current role.
+ */
 public class RoleContext {
-	private static final ThreadLocal<String> ROLE = new ThreadLocal<>();
+    
+    private static final ThreadLocal<String> roleThreadLocal = new ThreadLocal<>();
 
     private RoleContext() {}
 
     public static void setRole(String role) {
-        ROLE.set(role);
+        roleThreadLocal.set(role);
     }
 
     public static String getRole() {
-        String role = ROLE.get();
+        String role = roleThreadLocal.get();
         if (role == null) {
-            throw new RuntimeException("Role not set. Background step must define role.");
+            throw new IllegalStateException("Role not set for current thread");
         }
         return role;
     }
 
     public static void clear() {
-        ROLE.remove();
+        roleThreadLocal.remove();
     }
 }

@@ -2,7 +2,7 @@
 <suite name="CTMS Suite" parallel="false">
     <test name="Cucumber Tests">
         <classes>
-            <class name="com.cro.runners.RunCucumberTest"/>
+            <class name="runners.RunCucumberTest"/>
         </classes>
     </test>
 </suite>

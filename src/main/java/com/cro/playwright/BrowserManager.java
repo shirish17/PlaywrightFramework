@@ -1,112 +1,207 @@
 package com.cro.playwright;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.microsoft.playwright.*;
 
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.BrowserType;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
+import java.util.List;
+
 /**
- * Browser-Level Context Lifecycle Synchronization
- * 
- * Uses ReadWriteLock (Readers-Writer pattern) to coordinate:
- * - Context creation (multiple concurrent - read lock)
- * - Context closure (exclusive - write lock)
- * 
- * Prevents Playwright browser state corruption in parallel execution.
+ * Browser lifecycle manager - SEQUENTIAL execution.
+ * Singleton Playwright, Browser, Context and Page.
  */
-
 public class BrowserManager {
 
-	private static Playwright playwright;
+    private static Playwright playwright;
     private static Browser browser;
-
-    private static final ThreadLocal<BrowserContext> contextThreadLocal = new ThreadLocal<>();
-    private static final ThreadLocal<Page> pageThreadLocal = new ThreadLocal<>();
-
-    private static final ReadWriteLock contextLock = new ReentrantReadWriteLock();
+    private static BrowserContext context;
+    private static Page page;
 
     private BrowserManager() {}
 
-    public static synchronized void initBrowser(String browserName) {
-
-        if (browser != null && browser.isConnected())
+    /**
+     * Initialize browser once at @BeforeAll.
+     */
+    public static synchronized void initBrowser(String browserType) {
+        if (browser != null && browser.isConnected()) {
+            System.out.println("⚠ Browser already initialized");
             return;
+        }
 
         playwright = Playwright.create();
 
-        BrowserType type;
-        switch (browserName.toLowerCase()) {
-            case "firefox": type = playwright.firefox(); break;
-            case "webkit": type = playwright.webkit(); break;
-            default: type = playwright.chromium();
+        boolean headless = Boolean.parseBoolean(
+                System.getProperty("headless", "false"));
+
+        String normalizedBrowser = (browserType == null || browserType.isBlank())
+                ? "chrome"
+                : browserType.toLowerCase().trim();
+
+        switch (normalizedBrowser) {
+
+            case "chrome":
+                browser = playwright.chromium().launch(
+                        new BrowserType.LaunchOptions()
+                                .setHeadless(headless)
+                                .setChannel("chrome")
+                                .setArgs(List.of("--start-maximized"))
+                );
+                break;
+
+            case "edge":
+            case "msedge":
+                browser = playwright.chromium().launch(
+                        new BrowserType.LaunchOptions()
+                                .setHeadless(headless)
+                                .setChannel("msedge")
+                                .setArgs(List.of("--start-maximized"))
+                );
+                break;
+
+            case "chromium":
+                browser = playwright.chromium().launch(
+                        new BrowserType.LaunchOptions()
+                                .setHeadless(headless)
+                                .setArgs(List.of("--start-maximized"))
+                );
+                break;
+
+            case "firefox":
+                browser = playwright.firefox().launch(
+                        new BrowserType.LaunchOptions()
+                                .setHeadless(headless)
+                );
+                break;
+
+            case "webkit":
+            case "safari":
+                browser = playwright.webkit().launch(
+                        new BrowserType.LaunchOptions()
+                                .setHeadless(headless)
+                );
+                break;
+
+            default:
+                playwright.close();
+                throw new IllegalArgumentException(
+                    "\n╔════════════════════════════════════════════════════════╗\n" +
+                    "║  UNSUPPORTED BROWSER: " + browserType + "              \n" +
+                    "║                                                        ║\n" +
+                    "║  Supported values (case-insensitive):                  ║\n" +
+                    "║  chrome, chromium, firefox, webkit, safari,            ║\n" +
+                    "║  edge, msedge                                          ║\n" +
+                    "╚════════════════════════════════════════════════════════╝"
+                );
         }
 
-        boolean headless = Boolean.parseBoolean(System.getProperty("headless","true"));
-
-        browser = type.launch(new BrowserType.LaunchOptions().setHeadless(headless));
-
-        System.out.println("✓ Browser launched: " + browserName);
+        System.out.println("✓ Browser launched: " + normalizedBrowser +
+                " (headless=" + headless + ")");
     }
 
+    /**
+     * Get browser instance.
+     */
     public static Browser getBrowser() {
-
-        if (browser == null || !browser.isConnected()) {
-            System.out.println("⚠ Browser disconnected. Relaunching...");
-            initBrowser("chromium");
+        if (browser == null) {
+            throw new IllegalStateException("Browser not initialized");
+        }
+        if (!browser.isConnected()) {
+            throw new IllegalStateException("Browser disconnected");
         }
         return browser;
     }
 
-    public static void acquireContextCreationLock() {
-        contextLock.readLock().lock();
+    /**
+     * Set context and create page.
+     * setViewportSize(null) = real maximized window.
+     */
+    public static void setContext(BrowserContext ctx) {
+        if (ctx == null) {
+            throw new IllegalArgumentException("Cannot set null context");
+        }
+        context = ctx;
+
+        // Reuse existing page if already open (avoids creating duplicate pages)
+        // Session reuse path: context has no pages → create one
+        // New session path: login page was closed → create one
+        // Either way context.pages() will be empty, so newPage() is correct
+        if (!ctx.pages().isEmpty()) {
+            // Context already has an open page - reuse it
+            page = ctx.pages().get(0);
+            System.out.println("  ✓ Reusing existing page in context");
+        } else {
+            // No open pages - create fresh one
+            page = ctx.newPage();
+            System.out.println("  ✓ New page created for context");
+        }
+
+        System.out.println("  ✓ Context set for thread: " +
+            Thread.currentThread().getName());
     }
 
-    public static void releaseContextCreationLock() {
-        contextLock.readLock().unlock();
-    }
-
-    public static void setContext(BrowserContext context) {
-
-        contextThreadLocal.set(context);
-
-        Page page = context.newPage();
-        pageThreadLocal.set(page);
-    }
-
-    public static Page getPage() {
-        return pageThreadLocal.get();
-    }
-
+    /**
+     * Get current context.
+     */
     public static BrowserContext getContext() {
-        return contextThreadLocal.get();
+        if (context == null) {
+            throw new IllegalStateException("Context not set");
+        }
+        return context;
     }
 
+    /**
+     * Get current page.
+     */
+    public static Page getPage() {
+        if (page == null) {
+            throw new IllegalStateException("Page not set");
+        }
+        if (page.isClosed()) {
+            throw new IllegalStateException("Page is closed");
+        }
+        return page;
+    }
+
+    /**
+     * Close current context.
+     * Called from @After in ScenarioHooks.
+     */
     public static void closeContext() {
+        if (context == null) {
+            context = null;
+            page = null;
+            return;
+        }
 
-        BrowserContext ctx = contextThreadLocal.get();
-        if (ctx == null) return;
-
-        contextLock.writeLock().lock();
         try {
-            ctx.close();
+            context.close();
+            System.out.println("  ✓ Context closed");
+        } catch (Exception e) {
+            System.err.println("  ⚠ Error closing context: " + e.getMessage());
         } finally {
-            contextThreadLocal.remove();
-            pageThreadLocal.remove();
-            contextLock.writeLock().unlock();
+            context = null;
+            page = null;
         }
     }
 
+    /**
+     * Shutdown browser at @AfterAll.
+     */
     public static synchronized void shutdown() {
+        if (browser != null) {
+            try {
+                browser.close();
+            } catch (Exception e) {
+                System.err.println("⚠ Error closing browser: " + e.getMessage());
+            }
 
-        if (browser == null) return;
+            try {
+                playwright.close();
+            } catch (Exception e) {
+                System.err.println("⚠ Error closing playwright: " + e.getMessage());
+            }
 
-        try { browser.close(); } catch(Exception ignored){}
-        try { playwright.close(); } catch(Exception ignored){}
-
-        browser=null;
-        System.out.println("✓ Browser shutdown");
+            browser = null;
+            playwright = null;
+            System.out.println("✓ Browser shutdown complete");
+        }
     }
 }
