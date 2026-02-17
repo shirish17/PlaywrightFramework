@@ -16,6 +16,8 @@ public class CountrySteps {
 
     private final CountryPage countryPage;
     private final HomePage homePage;
+    
+ // will hold <base>_<timestamp> returned by CountryPage.addCountry(...)
     private String generatedCountryName;
 
     public CountrySteps(CountryPage countryPage, HomePage homePage) {
@@ -49,22 +51,23 @@ public class CountrySteps {
         // Navigate to country management
         countryPage.navigateViaMenu();
         
-        Assert.assertTrue(countryPage.isOnCountryPage(), 
-            "Should be on country management page");
+        Assert.assertTrue(countryPage.isCountryNameLabelVisible(), 
+            "Should be showing Country Name Label on page.");
     }
-    /*
+    
 
     @And("the user adds a country named {string} and activates it")
     public void userAddsCountry(String countryName) {
         generatedCountryName = countryPage.addCountry(countryName, "Active");
         System.out.println("  Generated country name: " + generatedCountryName);
     }
-
+    
+    
     @Then("the country {string} appears in the list")
     public void countryAppearsInList(String countryName) {
-        Assert.assertTrue(countryPage.isCountryInTable(countryName), 
-            "Country " + countryName + " should appear in the list");
-        System.out.println("  ✅ Country verified: " + generatedCountryName);
+        Assert.assertTrue(countryPage.isCountryDisplayedInAvailableOptions(generatedCountryName), 
+            "Country: " + generatedCountryName + " should appear in the list");//Note we are using generatedCountry because it got appended with time-stamp for uniquness.
+        System.out.println("Country verified: " + generatedCountryName);
     }
-    */
+   
 }
