@@ -26,7 +26,7 @@ public class CountrySteps {
     }
 
     @When("the user is on the country management page")
-    public void navigateToCountryPage() {
+    public void navigateToCountryPage() throws InterruptedException {
         // Navigate to app if on blank page
         String currentUrl = BrowserManager.getPage().url();
         
@@ -58,7 +58,7 @@ public class CountrySteps {
 
     @And("the user adds a country named {string} and activates it")
     public void userAddsCountry(String countryName) {
-        generatedCountryName = countryPage.addCountry(countryName, "Active");
+        generatedCountryName = countryPage.addCountry(countryName.trim(), "Active");
         System.out.println("  Generated country name: " + generatedCountryName);
     }
     
@@ -68,6 +68,22 @@ public class CountrySteps {
         Assert.assertTrue(countryPage.isCountryDisplayedInAvailableOptions(generatedCountryName), 
             "Country: " + generatedCountryName + " should appear in the list");//Note we are using generatedCountry because it got appended with time-stamp for uniquness.
         System.out.println("Country verified: " + generatedCountryName);
+    }
+    
+    @And("the user delets an existing country named {string} from the country list")
+    public void deleteExistingCountry(String countryName) {
+        String actualDeletionMessage=countryPage.deleteCountryByNameFromSystemConfiguration(countryName.trim());
+        Assert.assertTrue(actualDeletionMessage.contains("Deleted successfully"));
+       
+    }
+    
+    @Then("the user able to view existing country named {string} on the country list")
+    public void viewExistingCountry(String countryName) {
+        String actualCountryName=countryPage.getCountryByNameFromSystemConfiguration(countryName);
+        System.out.println("Country return by Add event:"+actualCountryName);
+        System.out.println("Scenario has test data: "+countryName);
+        Assert.assertEquals(actualCountryName, countryName.trim(),"Country name mismatch after normalization.");
+       
     }
    
 }

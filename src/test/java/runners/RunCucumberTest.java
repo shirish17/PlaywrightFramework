@@ -7,7 +7,7 @@ import org.testng.annotations.DataProvider;
 @CucumberOptions(
         features = "classpath:features",
         glue = { "steps", "com.cro.hooks" },
-        tags = "@smoke and @high",
+        tags = "@smoke or @high",
         plugin = {
                 "pretty",
                 "html:test-output/cucumber-reports/cucumber.html",

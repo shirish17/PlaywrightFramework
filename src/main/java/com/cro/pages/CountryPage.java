@@ -34,7 +34,11 @@ public class CountryPage extends BasePage {
 	        " span:has-text('Available Options')) " +
 	        " ul[role='listbox'].k-list-ul";
 	private static final String AVAILABLE_OPTION_CONTAINER_BY_ROLE="ul[role='listbox'].k-list-ul"; //this is for fallback plan
-    // ========== LOCATORS ==========
+    private static final String DELETE_OPTION_LINK_IN_ACTION=" Delete Option";
+    private static final String DELETE_OPTION_DIALOG="Delete Option"; //this seems duplicate but purposely kept to avoid confusion
+    private static final String DELETE_BUTTON_IN_DIALOG = "Delete";
+    private static final String DELETE_SUCCESS_MESSAGE="Success! Option Deleted successfully";
+	// ========== LOCATORS ==========
     //Configuration link on top menu
     private Locator configurationMenuLink() {
         return locator(CONFIGURATION_LINK).first();
@@ -70,9 +74,7 @@ public class CountryPage extends BasePage {
     }
    
     private Locator saveButtonInDialog() {
-    	return getByRoleWithinParent(newOptionDialog(),AriaRole.BUTTON,SAVE_BUTTON_IN_DIALOG);
-        //return newOptionDialog().getByRole(AriaRole.BUTTON, 
-            //new Locator.GetByRoleOptions().setName(SAVE_BUTTON_IN_DIALOG).setExact(true));
+    	return getByRoleWithinParent(newOptionDialog(),AriaRole.BUTTON,SAVE_BUTTON_IN_DIALOG);        
     }
     
     private Locator saveButtonInActionsMenu() {
@@ -93,19 +95,41 @@ public class CountryPage extends BasePage {
     	return locator(AVAILABLE_OPTION_CONTAINER_BY_ROLE).first();
     }
 	
+  //Delete Option under action menu
+    private Locator deleteOptionMenu() {
+        return getByRole(AriaRole.BUTTON,DELETE_OPTION_LINK_IN_ACTION);
+    }
+    
+  //Delete optoin Dialog
+    private Locator deleteOptionDialog() {
+        return getByRoleByExact(AriaRole.HEADING,DELETE_OPTION_DIALOG);
+    }
+    
+    //Delete button in Dialog 
+    private Locator deleteButtonInInDialog() {
+        return getByRoleByExact(AriaRole.BUTTON,DELETE_BUTTON_IN_DIALOG);
+    }
+    
+    //Delete success message DELETE_SUCCESS_MESSAGE
+    private Locator successMessageOnDelete() {
+        return getByAlert(DELETE_SUCCESS_MESSAGE);
+    }
+    
     // ========== ACTIONS ==========
     /**
      * Navigate to System Configuration page via menu.
      * This is the method called by CountrySteps.navigateViaMenu()
+     * @throws InterruptedException 
      */
-    public CountryPage navigateViaMenu() {
+    public CountryPage navigateViaMenu() throws InterruptedException {
         System.out.println("  Navigating to Country Management via Configuration menu...");
-                
+        waitForKendoAngularPageReady();        
         // Hover System tab
         configurationMenuLink().scrollIntoViewIfNeeded();
         configurationMenuLink().hover();
                 
         //Click on System configuration link under menu
+        Thread.sleep(2000);
         clickOnElement(systemConfigLink());        
         
         // Wait for SPA navigation
@@ -114,9 +138,11 @@ public class CountryPage extends BasePage {
         
         //List(s) tab
         waitForVisible(listsTab());
-        clickOnElement(listsTab());          
+        Thread.sleep(5000);
+        clickOnElement(listsTab());
+        waitForKendoAngularPageReady();
                 
-        System.out.println("  ✓ On Country Management section");
+        System.out.println("On Lists tab for Country Management");
         return this;
     }
 
@@ -176,8 +202,9 @@ public class CountryPage extends BasePage {
         
         String messageAfterSaveFromActionMenu = getTextContent(successMessage()).trim();
         System.out.println(messageAfterSaveFromActionMenu);
-        
-        Assert.assertTrue(messageAfterSaveFromActionMenu.contains("Success"),"Expected:it should contain word 'Success'. Actual: "+messageAfterSaveFromActionMenu);
+        navigatePreviousPage();
+        String expectedMessage="Success";
+        Assert.assertTrue(messageAfterSaveFromActionMenu.contains(expectedMessage),"Expected:it should contain word: "+expectedMessage+".Actual: "+messageAfterSaveFromActionMenu);
         
         return fullCountryName;
     }
@@ -243,6 +270,106 @@ public class CountryPage extends BasePage {
 	    }
 	    Locator fallback = availableOptionListBox_fallback(); // FALLBACK selector
 	    return fallback;                                        // primary missing → use fallback
+	}
+
+	public String deleteCountryByNameFromSystemConfiguration(String countryName) {
+		String deletionResultMessage ="";
+		//Click County Name Label        
+        clickOnElement(countryNameLabel());
+        waitForKendoAngularPageReady();
+        
+      //Click County Name Label, since after save the selection is not retained       
+        clickOnElement(countryNameLabel());
+        waitForKendoAngularPageReady();
+        
+    	/*Country name shows under "Available Options" ListBox, so first step is to  get the list container,
+		list container is defined at page level, if it's not available below fallback mechanism
+		*/	
+    	 Locator listContainer = resolveAvailableOptionsListBox();
+    	// Wait for container to be visible
+    	 waitForVisible(listContainer);
+    	 
+    	// 2) Build a locator for an <li role='option'> that contains a <label> with the country text
+    	 Locator option=getByRoleWithinParentExact(listContainer,AriaRole.OPTION,countryName.trim());
+    	 Locator countryNameFound = scrollFindWithinParent(
+    	            listContainer,
+    	            option,
+    	            /* maxAttempts   */ 25,
+    	            /* debounceMs    */ 100,
+    	            /* initialWaitMs */ 500   // small extra guard (optional)
+    	        );//* maxAttempts   * --> this is comment to know the parameter name
+    	    if (countryNameFound == null) {
+    	    	// Not found within limit
+                return deletionResultMessage; // this stage string will be returned as null
+    	    }
+    	    countryNameFound.first().scrollIntoViewIfNeeded();    	       	    
+    	    // selects the country in the listbox, which needs to be deleted
+    	    clickOnElement(countryNameFound.first());
+    	    waitForKendoAngularPageReady();
+    	    
+    	    //Click delete link under actions 
+    	    clickOnElement(deleteOptionMenu());
+    	    
+    	    //waiting for Delete dialog
+    	    // Wait for dialog
+    	    deleteOptionDialog().waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(elementTimeout));            
+            waitForKendoLoadingComplete();
+            
+            deleteButtonInInDialog().scrollIntoViewIfNeeded();
+            clickOnElement(deleteButtonInInDialog());
+         
+            waitForVisible(successMessageOnDelete());
+            
+            deletionResultMessage= successMessageOnDelete().innerText().trim();
+            
+            System.out.println("Flash delete success message: "+deletionResultMessage);
+            
+            //Assert.assertTrue(successMessageOnDelete().innerText().trim().contains("Deleted successfully"));
+            
+            navigatePreviousPage();//optional step otherwise record will be locked (application behavior) 
+            return deletionResultMessage;
+		
+	}
+
+	public String getCountryByNameFromSystemConfiguration(String countryName) {
+		String countryNameFromAvailableList="";
+		try {
+			clickOnElement(countryNameLabel());
+	        waitForKendoAngularPageReady();
+	        
+	    	/*Country name shows under "Available Options" ListBox, so first step is to  get the list container,
+			list container is defined at page level, if it's not available below fallback mechanism
+			*/	
+	    	 Locator listContainer = resolveAvailableOptionsListBox();
+	    	// Wait for container to be visible
+	    	 waitForVisible(listContainer);
+	    	// 2) Build a locator for an <li role='option'> that contains a <label> with our country text
+	    	 Locator option=getByRoleWithinParentExact(listContainer,AriaRole.OPTION,countryName);
+	    	 Locator countryNameFound = scrollFindWithinParent(
+	    	            listContainer,
+	    	            option,
+	    	            /* maxAttempts   */ 25,
+	    	            /* debounceMs    */ 100,
+	    	            /* initialWaitMs */ 500   // small extra guard (optional)
+	    	        );//* maxAttempts   * --> this is comment to know the parameter name
+	    	    if (countryNameFound == null) {
+	    	    	// Not found within limit
+	                return countryNameFromAvailableList;
+	    	    }
+	    	    countryNameFound.first().scrollIntoViewIfNeeded();	    	    
+	    	    countryNameFromAvailableList=countryNameFound.first().innerText().trim();
+	    	    countryNameFromAvailableList=normalizeUiText(countryNameFromAvailableList); //this will normalize UI text and return in same variable
+	    	    
+	    	    navigatePreviousPage();//optional step otherwise record will be locked (application behavior)
+	    	 
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return countryNameFromAvailableList;
+		
+		
 	}
    
 }

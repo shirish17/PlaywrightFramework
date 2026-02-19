@@ -9,6 +9,7 @@ import com.microsoft.playwright.options.AriaRole;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import com.microsoft.playwright.options.WaitUntilState;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -35,11 +36,22 @@ public class BasePage {
 		return getPage().locator(selector);
 	}
 
+	/*
+	 * * Because we didn’t set .setExact(true), Playwright uses a partial (contains)
+	 * on the provided string locator
+	 */
 	protected Locator getByRole(AriaRole role, String name) {
 		return getPage().getByRole(role, new Page.GetByRoleOptions().setName(name));
 	}
 
-	// This strategy will look for child under parant with exact name property of
+	/*
+	 * This will look for the exact match of the provided string
+	 */
+	protected Locator getByRoleByExact(AriaRole role, String name) {
+		return getPage().getByRole(role, new Page.GetByRoleOptions().setName(name).setExact(true));
+	}
+
+	// This strategy will look for child under parent with exact name property of
 	// child, setExact(true)
 	protected Locator getByRoleWithinParentExact(Locator parent, AriaRole role, String childName) {
 		return parent.getByRole(role, new Locator.GetByRoleOptions().setName(childName).setExact(true));
@@ -96,6 +108,47 @@ public class BasePage {
 		return index >= 0 ? locator.nth(index) : locator;
 	}
 
+	/*
+	 * /** Return a Locator for a success/alert toast that contains the given text
+	 * fragment. This does NOT wait; it only builds a resilient locator with
+	 * fallbacks.
+	 *
+	 * Order: 1) role=alert INSIDE Kendo region, with accessible-name containing the
+	 * fragment 2) text match INSIDE Kendo region 3) global text match as a last
+	 * resort
+	 */
+
+	public Locator getByAlert(String textFragment) {
+		final String KENDO_REGION_SELECTOR = ".k-notification, .k-toast, .k-message, kendo-notification-container";
+
+		try {
+			// 1) Scope to Kendo region
+			Locator region = getPage().locator(KENDO_REGION_SELECTOR).first();
+
+			// ✅ Role-based with scope INSIDE the region, otherwise it will search entire
+			// page (wrong)
+			Locator roleAlertInRegion = region.getByRole(AriaRole.ALERT,
+					new Locator.GetByRoleOptions().setName(textFragment) // contains match by default
+			);
+			if (roleAlertInRegion.count() > 0) {
+				return roleAlertInRegion;
+			}
+
+			// 2) Fallback: any element in the region with the text
+			Locator textInRegion = region.locator(":scope", new Locator.LocatorOptions().setHasText(textFragment))
+					.first();
+			if (textInRegion.count() > 0) {
+				return textInRegion;
+			}
+
+			// 3) Last resort: global text
+			return getPage().getByText(textFragment).first();
+
+		} catch (RuntimeException ex) {
+			// Defensive fallback so the caller always gets a usable Locator
+			return getPage().getByText(textFragment).first();
+		}
+	}
 	// ========== ACTIONS WITH TIMEOUT ==========
 
 	public void clickOnElement(Locator locator) {
@@ -151,83 +204,124 @@ public class BasePage {
 	// list
 //	    Returns the option Locator when found, or null if not found within attempts.
 	// =========================================
-	    /**
-	     * Scrolls a (potentially virtualized) parent container by 1 viewport at a time until the child locator
-	     * is present & visible, or attempts are exhausted.
-	     *
-	     * @param parent         Scrollable container (e.g., the listbox <ul>)
-	     * @param child          Child locator to look for (e.g., li[role='option'] with exact country)
-	     * @param maxAttempts    Number of scroll steps (1 step ≈ one clientHeight)
-	     * @param debounceMs     Small wait after each scroll to allow the DOM to render (80–150ms typical)
-	     * @param initialWaitMs  Initial wait for the parent to become visible (0 to skip)
-	     * @return The child locator (same instance passed in) if it becomes visible; otherwise null
-	     */
-	    public static Locator scrollFindWithinParent(
-	            Locator parent,
-	            Locator child,
-	            int maxAttempts,
-	            int debounceMs,
-	            int initialWaitMs
-	    ) {
-	        // Ensure parent is visible (once)
-	        if (initialWaitMs > 0) {
-	            parent.first().waitFor(new Locator.WaitForOptions()
-	                .setState(WaitForSelectorState.VISIBLE)
-	                .setTimeout(initialWaitMs));
-	        }
+	/**
+	 * Scrolls a (potentially virtualized) parent container by 1 viewport at a time
+	 * until the child locator is present & visible, or attempts are exhausted.
+	 *
+	 * @param parent        Scrollable container (e.g., the listbox
+	 *                      <ul>
+	 *                      )
+	 * @param child         Child locator to look for (e.g., li[role='option'] with
+	 *                      exact country)
+	 * @param maxAttempts   Number of scroll steps (1 step ≈ one clientHeight)
+	 * @param debounceMs    Small wait after each scroll to allow the DOM to render
+	 *                      (80–150ms typical)
+	 * @param initialWaitMs Initial wait for the parent to become visible (0 to
+	 *                      skip)
+	 * @return The child locator (same instance passed in) if it becomes visible;
+	 *         otherwise null
+	 */
+	public static Locator scrollFindWithinParent(Locator parent, Locator child, int maxAttempts, int debounceMs,
+			int initialWaitMs) {
+		// Ensure parent is visible (once)
+		if (initialWaitMs > 0) {
+			parent.first().waitFor(
+					new Locator.WaitForOptions().setState(WaitForSelectorState.VISIBLE).setTimeout(initialWaitMs));
+		}
 
-	        // Quick check before scrolling
-	        if (child.count() > 0 && child.first().isVisible()) {
-	            return child;
-	        }
+		// Quick check before scrolling
+		if (child.count() > 0 && child.first().isVisible()) {
+			return child;
+		}
 
-	        double previousTop = -1;
-	        for (int i = 0; i < maxAttempts; i++) {
-	            // Read current scroll metrics
-	            double top    = ((Number) parent.evaluate("el => el.scrollTop")).doubleValue();
-	            double total  = ((Number) parent.evaluate("el => el.scrollHeight")).doubleValue();
-	            double client = ((Number) parent.evaluate("el => el.clientHeight")).doubleValue();
+		double previousTop = -1;
+		for (int i = 0; i < maxAttempts; i++) {
+			// Read current scroll metrics
+			double top = ((Number) parent.evaluate("el => el.scrollTop")).doubleValue();
+			double total = ((Number) parent.evaluate("el => el.scrollHeight")).doubleValue();
+			double client = ((Number) parent.evaluate("el => el.clientHeight")).doubleValue();
 
-	            // Early exit: bottom reached or no movement
-	            if (top >= total - client - 1 || top == previousTop) {
-	                break;
-	            }
-	            previousTop = top;
+			// Early exit: bottom reached or no movement
+			if (top >= total - client - 1 || top == previousTop) {
+				break;
+			}
+			previousTop = top;
 
-	            // Scroll down by one viewport
-	            parent.evaluate("el => { el.scrollBy(0, el.clientHeight); }");
+			// Scroll down by one viewport
+			parent.evaluate("el => { el.scrollBy(0, el.clientHeight); }");
 
-	            // Debounce to allow rendering
-	            if (debounceMs > 0) {
-	                parent.page().waitForTimeout(debounceMs);
-	            }
+			// Debounce to allow rendering
+			if (debounceMs > 0) {
+				parent.page().waitForTimeout(debounceMs);
+			}
 
-	            // Re-check child
-	            if (child.count() > 0 && child.first().isVisible()) {
-	                return child;
-	            }
-	        }
+			// Re-check child
+			if (child.count() > 0 && child.first().isVisible()) {
+				return child;
+			}
+		}
 
-	        // Optional: last jump to bottom (may help render last page)
-	        try {
-	            parent.evaluate("el => { el.scrollTop = el.scrollHeight; }");
-	            if (debounceMs > 0) parent.page().waitForTimeout(debounceMs);
-	            if (child.count() > 0 && child.first().isVisible()) {
-	                return child;
-	            }
-	        } catch (RuntimeException ignored) {}
+		// Optional: last jump to bottom (may help render last page)
+		try {
+			parent.evaluate("el => { el.scrollTop = el.scrollHeight; }");
+			if (debounceMs > 0)
+				parent.page().waitForTimeout(debounceMs);
+			if (child.count() > 0 && child.first().isVisible()) {
+				return child;
+			}
+		} catch (RuntimeException ignored) {
+		}
 
-	        return null;
-	    }
-	    
-	    /*
-	     * This will go back to the previous page, some pages are locked and can't be used by concurrent users
-	     * Example: System configuration then that time go to previous page (usually it connect to home page)
-	     */
-	    public void navigatePreviousPage() {
-	    	getPage().goBack();
-	    }
+		return null;
+	}
 
+	/*
+	 * This will go back to the previous page, some pages are locked and can't be
+	 * used by concurrent users Example: System configuration then that time go to
+	 * previous page (usually it connect to home page)
+	 */
+	public void navigatePreviousPage() {
+		getPage().goBack();
+	}
+	/*
+	 * Below method will normalize UI text.the two values “look” the same in
+	 * console, but they are not byte‑for‑byte identical. Common culprits: *
+	 * Non‑breaking/thin/zero‑width spaces coming from the DOM (e.g., \u00A0,
+	 * \u202F, \u200B) Invisible characters like BOM \uFEFF Different whitespace
+	 * runs (multi‑space, newlines) Different Unicode normalization (e.g., composed
+	 * vs decomposed characters) Example: Country return by Add
+	 * event:Auto_CountryName_20260218_134159 Scenario has test data:
+	 * Auto_CountryName_20260218_134159
+	 */
+	public static String normalizeUiText(String textToNormalize) {
+	    if (textToNormalize == null) return "";
+
+	    // 1) Normalize Unicode to a compatibility form (handles look‑alike characters, composed forms, etc.)
+	    String normalizedText = Normalizer.normalize(textToNormalize, Normalizer.Form.NFKC);
+
+	    // 2) Remove invisible control characters that often sneak in from the DOM
+	    normalizedText = normalizedText
+	            .replace("\uFEFF", "")  // Byte Order Mark (BOM)
+	            .replace("\u200B", "")  // Zero-width space
+	            .replace("\u200C", "")  // Zero-width non-joiner
+	            .replace("\u200D", "")  // Zero-width joiner
+	            .replace("\u2060", ""); // Word joiner
+
+	    // 3) Map non-breaking / thin spaces to regular spaces (so spacing compares cleanly)
+	    normalizedText = normalizedText
+	            .replace('\u00A0', ' ') // NBSP
+	            .replace('\u202F', ' ') // Narrow NBSP
+	            .replace('\u2007', ' ');// Figure space
+
+	    // 4) Collapse all runs of whitespace to a single space and trim edges
+	    normalizedText = normalizedText.replaceAll("\\s+", " ").trim();
+
+	    return normalizedText;
+	}
+	
+	
+	
+	
 	// ============= KENDO + ANGULAR HELPERS ==================
 
 	public void waitForKendoLoadingComplete() {
